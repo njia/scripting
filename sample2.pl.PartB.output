@@ -1,0 +1,21 @@
+File: sample2.pl
+Lines: 16
+Words: 42
+Chars: 226
+[Keywords]
+use
+my
+STDIN
+chomp
+print
+sub
+return
+eq
+[Strings]
+"\n"
+"true or false"
+"7"
+[Comments]
+# Comment 1
+#now write input to STDOUT
+# true or false

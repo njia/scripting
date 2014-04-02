@@ -1,0 +1,14 @@
+File: hello.pl
+Lines: 8
+Words: 19
+Chars: 129
+[Keywords]
+use
+my
+print
+[Strings]
+'Hello World!'
+"$string\n"
+[Comments]
+# assign variable
+# display value
