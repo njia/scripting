@@ -5,9 +5,18 @@ use strict;
 use 5.010;
 
 sub get_keywords {
-  my $functions = `wget http://learn.perl.org/docs/keywords.html#functions`;
-  my $syntax    = `wget http://learn.perl.org/docs/keywords.html#barewords`;
-  my $file_handlers = `wget http://learn.perl.org/docs/keywords.html#file_handles`;
+  my $perl_keywords = `curl -s http://learn.perl.org/docs/keywords.html#functions`;
+  my $handle_start = "File Handles</h3>";
+  my $end_capture = "</table>";
+  my $key_words_start = '">';
+  my $key_words_end  = "</a>";
+  $perl_keywords =~ /(?:$handle_start)(.+?)(?:$end_capture)/s;
+  my $temp = $1;
+  my @list = $temp =~ /(?:$key_words_start)([A-Z]+?)(?:$key_words_end)/gs;
+  # print @list;
+
+  print join ":", @list;
+}
 
 my $input_file = $ARGV[0];
 
@@ -27,3 +36,5 @@ my ($lines, $words, $chars) = $result =~ /[0-9]+/g;
 print "Lines: $lines\n";
 print "Words: $words\n";
 print "Chars: $chars\n";
+
+&get_keywords;
