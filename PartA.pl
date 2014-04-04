@@ -39,7 +39,7 @@ sub get_keywords {
   return %key_words;
 }
 
-sub check_keywords {
+sub print_keywords {
   open my $IN_FILE, "<", $_[0] or die "Could read from file $_[0]\n";
   my %key_words = &get_keywords;
   my $number_of_keywords = 0;
@@ -48,8 +48,7 @@ sub check_keywords {
   while (<$IN_FILE>) {
     chomp;
     foreach my $word (split) {
-      # $word =~ s/[\W]//g;
-      # print $word, "\n";
+      $word =~ s/\W//g;
       if ($key_words{$word}) {
         print $word, "\n" unless ($seen{$word});
         $number_of_keywords++ unless ($seen{$word});
@@ -58,7 +57,7 @@ sub check_keywords {
       (close $IN_FILE and return) if $number_of_keywords == 15;
     }
   }
-} #!test
+}
 
 sub print_comments {
   open my $IN_FILE, "<", $_[0] or die "Could read from file $_[0]\n";
@@ -67,6 +66,17 @@ sub print_comments {
     print if /^#[^!]/;
     print "$1\n" if /(?:[^#]+?)(#.+$)/;
   }
+  close $IN_FILE;
+}
+
+sub print_strings {
+  open my $IN_FILE, "<", $_[0] or die "Could read from file $_[0]\n";
+  print "[Strings]\n";
+  while (<$IN_FILE>) {
+    print "$1\n" if /('.+?')/;
+    print "$1\n" if /(".+?")/;
+  }
+  close $IN_FILE;
 }
 
 my $input_file = $ARGV[0];
@@ -88,5 +98,6 @@ print "Lines: $lines\n";
 print "Words: $words\n";
 print "Chars: $chars\n";
 
-&check_keywords($input_file);
+&print_keywords($input_file);
+&print_strings($input_file);
 &print_comments($input_file);
