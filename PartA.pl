@@ -8,7 +8,7 @@ use 5.010;
 # list for Perl syntac, Perl functions and Perl find handles
 sub get_keywords {
   # Download the Perl keyword HTML file
-  my $perl_keywords = `curl -s http://learn.perl.org/docs/keywords.html#functions`;
+  my $perl_keywords = `curl -s http://learn.perl.org/docs/keywords.html`;
   # define start match for Perl file handle
   # define start match for Perl functions
   # define start match for Perl syntax
@@ -27,20 +27,46 @@ sub get_keywords {
   $perl_keywords =~ /(?:$handle_start)(.+?)(?:$end_capture)/s;
   my $temp = $1;
   my @filehandle_keyword_list = $temp =~ /(?:$key_words_start)([A-Z]+?)(?:$key_words_end)/gs;
-  print join ":", @filehandle_keyword_list, "\n";
 
   $perl_keywords =~ /(?:$function_start)(.+?)(?:$end_capture)/s;
   $temp = $1;
   my @function_keywoard_list = $temp =~ /(?:$key_words_start)([_a-zA-Z\-]+?)(?:$key_words_end)/gs;
-  print "Number of function keywords: \n", scalar @function_keywoard_list;
-  print join ":", @function_keywoard_list, "\n";
 
   $perl_keywords =~ /(?:$syntax_start)(.+?)(?:$end_capture)/s;
   $temp = $1;
   my @syntax_keywrod_list = $temp =~ /(?:$key_words_start)([_a-zA-Z\-]+?)(?:$key_words_end)/gs;
-  print "number of syntax keywords: \n", scalar @syntax_keywrod_list;
-  print join ":", @syntax_keywrod_list, "\n";
+  my %key_words = map { $_ => 1 } (@filehandle_keyword_list, @function_keywoard_list,  @syntax_keywrod_list);
+  return %key_words;
+}
 
+sub check_keywords {
+  open my $IN_FILE, "<", $_[0] or die "Could read from file $_[0]\n";
+  my %key_words = &get_keywords;
+  my $number_of_keywords = 0;
+  my %seen = ();
+  print "[Keywords]\n";
+  while (<$IN_FILE>) {
+    chomp;
+    foreach my $word (split) {
+      # $word =~ s/[\W]//g;
+      # print $word, "\n";
+      if ($key_words{$word}) {
+        print $word, "\n" unless ($seen{$word});
+        $number_of_keywords++ unless ($seen{$word});
+        $seen{$word}++;
+      }
+      (close $IN_FILE and return) if $number_of_keywords == 15;
+    }
+  }
+} #!test
+
+sub print_comments {
+  open my $IN_FILE, "<", $_[0] or die "Could read from file $_[0]\n";
+  print "[Comments]\n";
+  while (<$IN_FILE>) {
+    print if /^#[^!]/;
+    print "$1\n" if /(?:[^#]+?)(#.+$)/;
+  }
 }
 
 my $input_file = $ARGV[0];
@@ -62,4 +88,5 @@ print "Lines: $lines\n";
 print "Words: $words\n";
 print "Chars: $chars\n";
 
-&get_keywords;
+&check_keywords($input_file);
+&print_comments($input_file);
