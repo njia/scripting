@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-#
+
 use warnings;
 use strict;
 use 5.010;
@@ -40,28 +40,29 @@ sub get_keywords {
 }
 
 sub print_keywords {
-  open my $IN_FILE, "<", $_[0] or die "Could read from file $_[0]\n";
-  my %key_words = &get_keywords;
+  open my $IN_FILE, "<", $_[0] or die "print_keywords: Could not read from file $_[0]\n";
+  my %perl_key_words = &get_keywords;
   my $number_of_keywords = 0;
   my %seen = ();
   print "[Keywords]\n";
   while (<$IN_FILE>) {
     chomp;
     foreach my $word (split) {
-      $word =~ s/\W//g;
-      if ($key_words{$word}) {
-        print $word, "\n" unless ($seen{$word});
+      $word =~ s/[^@\$%&a-zA-Z_-]//g;
+      if ($perl_key_words{$word}) {
+        print $word, "\n" unless ($seen{$word} || ($number_of_keywords > 15));
         $number_of_keywords++ unless ($seen{$word});
         $seen{$word}++;
       }
-      (close $IN_FILE and return) if $number_of_keywords == 15;
     }
   }
+  close $IN_FILE;
 }
 
 sub print_comments {
-  open my $IN_FILE, "<", $_[0] or die "Could read from file $_[0]\n";
+  open my $IN_FILE, "<", $_[0] or die "print_comments: Could not read from file $_[0]\n";
   print "[Comments]\n";
+  my %seen = ();
   while (<$IN_FILE>) {
     print if /^#[^!]/;
     print "$1\n" if /(?:[^#]+?)(#.+$)/;
@@ -70,11 +71,10 @@ sub print_comments {
 }
 
 sub print_strings {
-  open my $IN_FILE, "<", $_[0] or die "Could read from file $_[0]\n";
+  open my $IN_FILE, "<", $_[0] or die "print_strings: Could not read from file $_[0]\n";
   print "[Strings]\n";
   while (<$IN_FILE>) {
-    print "$1\n" if /('.+?')/;
-    print "$1\n" if /(".+?")/;
+    print map { $_."\n"} /(".*?"|'.*?')/g;
   }
   close $IN_FILE;
 }
