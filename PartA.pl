@@ -59,13 +59,15 @@ sub print_keywords {
   close $IN_FILE;
 }
 
+#! special comments
+
 sub print_comments {
   open my $IN_FILE, "<", $_[0] or die "print_comments: Could not read from file $_[0]\n";
   print "[Comments]\n";
-  my %seen = ();
-  while (<$IN_FILE>) {
-    print if /^#[^!]/;
-    print "$1\n" if /(?:[^#]+?)(#.+$)/;
+  my @comments = ();
+  while (<$IN_FILE>) { # inline comments for test
+    print /^(#[^!]+$)/;
+    print "$1" if m{(?:^[^#]+?)(#[^/]+$)};
   }
   close $IN_FILE;
 }
@@ -73,9 +75,11 @@ sub print_comments {
 sub print_strings {
   open my $IN_FILE, "<", $_[0] or die "print_strings: Could not read from file $_[0]\n";
   print "[Strings]\n";
+  my @strings = ();
   while (<$IN_FILE>) {
-    print map { $_."\n"} /(".*?"|'.*?')/g;
+    push @strings, map {$_."\n"} /(".*?"|'.*?')/g
   }
+  print map {$strings[$_]} (0..4);
   close $IN_FILE;
 }
 
