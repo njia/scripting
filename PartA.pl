@@ -66,9 +66,9 @@ sub print_comments {
   print "[Comments]\n";
   my @comments = ();
   while (<$IN_FILE>) { # inline comments for test
-    print /^(#[^!]+$)/;
-    print "$1" if m{(?:^[^#]+?)(#[^/]+$)};
+    push @comments, "$1" if /^([\s]*?#[^!]+$)/;
   }
+  print map {$comments[$_]} (0..4);
   close $IN_FILE;
 }
 
@@ -77,6 +77,7 @@ sub print_strings {
   print "[Strings]\n";
   my @strings = ();
   while (<$IN_FILE>) {
+    s/^([\s]*?#[^!]+$)//; # remove any comments so quotaed string would be captured
     push @strings, map {$_."\n"} /(".*?"|'.*?')/g
   }
   print map {$strings[$_]} (0..4);
