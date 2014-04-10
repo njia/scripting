@@ -59,14 +59,13 @@ sub print_keywords {
   close $IN_FILE;
 }
 
-#! special comments
-
 sub print_comments {
   open my $IN_FILE, "<", $_[0] or die "print_comments: Could not read from file $_[0]\n";
   print "[Comments]\n";
   my @comments = ();
   while (<$IN_FILE>) { # inline comments for test
-    push @comments, "$1" if /^([\s]*?#[^!]+$)/;
+    push @comments, "$1" if /^(#[^!]+$)/;
+    push @comments, "$1" if m{(?:^[^#]+?)(#[^/]+$)};
   }
   print map {$comments[$_]} (0..4);
   close $IN_FILE;
@@ -77,7 +76,7 @@ sub print_strings {
   print "[Strings]\n";
   my @strings = ();
   while (<$IN_FILE>) {
-    s/^([\s]*?#[^!]+$)//; # remove any comments so quotaed string would be captured
+    s/^([^#]*?)(#.*?$)/$1/ if /#/;
     push @strings, map {$_."\n"} /(".*?"|'.*?')/g
   }
   print map {$strings[$_]} (0..4);
