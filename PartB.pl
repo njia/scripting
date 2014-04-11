@@ -67,7 +67,8 @@ sub print_comments {
     push @comments, "$1" if /^(#[^!]+$)/;
     push @comments, "$1" if m{(?:^[^#]+?)(#[^/]+$)};
   }
-  print map {$comments[$_]} (0..4);
+  my $number = (scalar @comments > 4) ? 4 : (scalar @comments);
+  print map {$comments[$_]} (0..$number-1);
   close $IN_FILE;
 }
 
@@ -78,7 +79,8 @@ sub print_strings {
   while (<$IN_FILE>) {
     push @strings, map {$_."\n"} /(".*?"|'.*?')/g
   }
-  print map {$strings[$_]} (0..4);
+  my $number = (scalar @strings > 4) ? 4 : (scalar @strings);
+  print map {$strings[$_]} (0..$number-1);
   close $IN_FILE;
 }
 
@@ -102,11 +104,12 @@ open my $IN_FILE, "<", $input_file or die "Could not read from $input_file\n";
   while (<$IN_FILE>) {
     $lines = $. if eof;
     push @words, split;
+    push @chars, split //, $_;
   }
 
 print "Lines: $lines\n";
 print "Words: ", scalar @words, "\n";
-# print "Chars: ", scalar $chars, "\n";
+print "Chars: ", scalar @chars, "\n";
 
 &print_keywords($input_file);
 &print_strings($input_file);
