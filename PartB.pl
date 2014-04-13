@@ -89,12 +89,12 @@ my $input_file = $ARGV[0];
 die "Error: unable to analyse the specified file.\n" if !defined $input_file;
 chomp $input_file;
 
-print "File: $input_file\n";
-
 unless ( $input_file =~ /.p[l|m]$/ && -R -f -s -T $input_file) {
   die "Error: unable to analyse the specified file.\n";
   exit 1;
 }
+
+print "File: $input_file\n";
 
 my $lines = 0;
 my @words = ();

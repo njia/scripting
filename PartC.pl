@@ -39,6 +39,30 @@ sub get_keywords {
   return %key_words;
 }
 
+sub print_numbers {
+  open my $IN_FILE, "<", $_[0] or die "print_keywords: Could not read from file $_[0]\n";
+  my @numbers = ();
+  my @words = ();
+  print "[Numbers]\n";
+  while (<$IN_FILE>) {
+    s/^(#[^!]+$)//;
+    s{(^[^#]+?)(#[^/]+$)}{$1};
+    s/('.*?'|".*?")//g;
+    push @words, split;
+  }
+
+  foreach my $item (<@words>) {
+    push @numbers, $1 if $item =~ /([-+]?([0-9]+(\.[0-9]+)?|\.[0-9]+))/;
+  }
+
+  foreach my $item (<@numbers>) {
+    print $item."\n" and my $count++;
+    break if $count >10;
+  }
+}
+
+
+
 sub print_keywords {
   open my $IN_FILE, "<", $_[0] or die "print_keywords: Could not read from file $_[0]\n";
   my %perl_key_words = &get_keywords;
@@ -67,8 +91,8 @@ sub print_comments {
     push @comments, "$1" if /^(#[^!]+$)/;
     push @comments, "$1" if m{(?:^[^#]+?)(#[^/]+$)};
   }
-  my $number = (scalar @comments > 4) ? 4 : (scalar @comments);
-  print map {$comments[$_]} (0..$number-1);
+  my $number = (scalar @comments > 4) ? 4 : (scalar @comments) -1;
+  print map {$comments[$_]} (0..$number);
   close $IN_FILE;
 }
 
@@ -79,8 +103,8 @@ sub print_strings {
   while (<$IN_FILE>) {
     push @strings, map {$_."\n"} /(".*?"|'.*?')/g
   }
-  my $number = (scalar @strings > 4) ? 4 : (scalar @strings);
-  print map {$strings[$_]} (0..$number-1);
+  my $number = (scalar @strings > 4) ? 4 : (scalar @strings) -1;
+  print map {$strings[$_]} (0..$number);
   close $IN_FILE;
 }
 
@@ -89,12 +113,12 @@ my $input_file = $ARGV[0];
 die "Error: unable to analyse the specified file.\n" if !defined $input_file;
 chomp $input_file;
 
-print "File: $input_file\n";
-
-unless ( $input_file =~ /.p[l|m]$/ && -R $input_file && -f $input_file && -s $input_file) {
+unless ( $input_file =~ /.p[l|m]$/ && -R -f -s -T $input_file) {
   die "Error: unable to analyse the specified file.\n";
   exit 1;
 }
+
+print "File: $input_file\n";
 
 my $lines = 0;
 my @words = ();
@@ -112,5 +136,6 @@ print "Words: ", scalar @words, "\n";
 print "Chars: ", scalar @chars, "\n";
 
 &print_keywords($input_file);
+&print_numbers($input_file);
 &print_strings($input_file);
 &print_comments($input_file);
