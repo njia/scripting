@@ -67,8 +67,8 @@ sub print_comments {
     push @comments, "$1" if /^(#[^!]+$)/;
     push @comments, "$1" if m{(?:^[^#]+?)(#[^/]+$)};
   }
-  my $number = (scalar @comments > 4) ? 4 : (scalar @comments);
-  print map {$comments[$_]} (0..$number-1);
+  my $number = (scalar @comments > 4) ? 4 : (scalar @comments) -1;
+  print map {$comments[$_]} (0..$number);
   close $IN_FILE;
 }
 
@@ -79,8 +79,8 @@ sub print_strings {
   while (<$IN_FILE>) {
     push @strings, map {$_."\n"} /(".*?"|'.*?')/g
   }
-  my $number = (scalar @strings > 4) ? 4 : (scalar @strings);
-  print map {$strings[$_]} (0..$number-1);
+  my $number = (scalar @strings > 4) ? 4 : (scalar @strings) -1;
+  print map {$strings[$_]} (0..$number);
   close $IN_FILE;
 }
 
@@ -91,7 +91,7 @@ chomp $input_file;
 
 print "File: $input_file\n";
 
-unless ( $input_file =~ /.p[l|m]$/ && -R $input_file && -f $input_file && -s $input_file) {
+unless ( $input_file =~ /.p[l|m]$/ && -R -f -s -T $input_file) {
   die "Error: unable to analyse the specified file.\n";
   exit 1;
 }

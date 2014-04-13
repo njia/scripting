@@ -67,7 +67,8 @@ sub print_comments {
     push @comments, "$1" if /^(#[^!]+$)/;
     push @comments, "$1" if m{(?:^[^#]+?)(#[^/]+$)};
   }
-  print map {$comments[$_]} (0..4);
+  my $number = (scalar @comments > 4) ? 4 : (scalar @comments ) -1;
+  print map {$comments[$_]} (0..$number);
   close $IN_FILE;
 }
 
@@ -79,7 +80,8 @@ sub print_strings {
     s/^([^#]*?)(#.*?$)/$1/ if /#/;
     push @strings, map {$_."\n"} /(".*?"|'.*?')/g
   }
-  print map {$strings[$_]} (0..4);
+  my $number = (scalar @strings > 4) ? 4 : (scalar @strings) -1;
+  print map {$strings[$_]} (0..$number);
   close $IN_FILE;
 }
 
@@ -88,12 +90,12 @@ my $input_file = $ARGV[0];
 die "Error: unable to analyse the specified file.\n" if !defined $input_file;
 chomp $input_file;
 
-print "File: $input_file\n";
-
-unless ( $input_file =~ /.p[l|m]$/ && -R $input_file && -f $input_file && -s $input_file) {
+unless ( $input_file =~ /.p[l|m]$/ && -R -f -s -T $input_file) {
   die "Error: unable to analyse the specified file.\n";
   exit 1;
 }
+
+print "File: $input_file\n";
 
 my $result = `wc -l -w -m $input_file`;
 my ($lines, $words, $chars) = $result =~ /[0-9]+/g;
