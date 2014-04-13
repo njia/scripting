@@ -52,7 +52,8 @@ sub print_numbers {
   }
 
   foreach my $item (@words) {
-    push @numbers, $1 if $item =~ /([-+]?([0-9]+(\.[0-9]+)?|\.[0-9]+))/;
+    push @numbers, $1 if $item =~ /\b([-+]?([0-9_]+(\.[0-9_]+)?|\.[0-9_]+)([eE]?[-+]?[0-9_]+)?)\b/;
+    push @numbers, $1 if $item =~ /\b((0[x|X][0-9a-fA-F_]+)|(0[0-7]+?)|(0[b|B][01_]+))\b/;
   }
 
   foreach my $item (@numbers) {
