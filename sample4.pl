@@ -17,8 +17,20 @@ my $t = +0.01;
 
 if $ARGV[0];
 
+my @array = (12345
+12345.67,
+.23E-10,             # a very small number
+3.14_15_92,         # a very important number
+4_294_967_296,       # underscore for legibility
+0xff,                # hex
+0xdead_beef,         # more hex
+0377,                # octal (only numbers, begins with 0)
+0b011011)            # binary
+
+my $numbers = (8..11);
+
 sub sample2
 {
-   print "true or false";
-   return 3 + 4 eq "7"; # true or false
+  print "true or false";
+  return 3 + 4 eq "7"; # true or false
 }

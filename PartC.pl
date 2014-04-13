@@ -51,11 +51,11 @@ sub print_numbers {
     push @words, split;
   }
 
-  foreach my $item (<@words>) {
+  foreach my $item (@words) {
     push @numbers, $1 if $item =~ /([-+]?([0-9]+(\.[0-9]+)?|\.[0-9]+))/;
   }
 
-  foreach my $item (<@numbers>) {
+  foreach my $item (@numbers) {
     print $item."\n" and my $count++;
     break if $count >10;
   }
