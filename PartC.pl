@@ -52,8 +52,9 @@ sub print_numbers {
   }
 
   foreach my $item (@words) {
-    push @numbers, $1 if $item =~ /\b([-+]?([0-9_]+(\.[0-9_]+)?|\.[0-9_]+)([eE]?[-+]?[0-9_]+)?)\b/;
-    push @numbers, $1 if $item =~ /\b((0[x|X][0-9a-fA-F_]+)|(0[0-7]+?)|(0[b|B][01_]+))\b/;
+    next if $item =~ /^[^-|^+|^\d|^.]/;
+    push @numbers, $1 if $item =~ s/([-+]?([0-9_]+(\.[0-9_]+)?|[-+]?\.[0-9_]+)([eE]?[-+]?[0-9_]+)?)\b//;
+    push @numbers, $1 if $item =~ /((0[x|X][0-9a-fA-F_]+)|(0[0-7]+?)|(0[b|B][01_]+))/;
   }
 
   foreach my $item (@numbers) {
@@ -61,8 +62,6 @@ sub print_numbers {
     break if $count >10;
   }
 }
-
-
 
 sub print_keywords {
   open my $IN_FILE, "<", $_[0] or die "print_keywords: Could not read from file $_[0]\n";
