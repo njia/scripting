@@ -57,10 +57,9 @@ sub print_numbers {
     push @numbers, $1 if $item =~ /((0[x|X][0-9a-fA-F_]+)|(0[0-7]+?)|(0[b|B][01_]+))/;
   }
 
-  foreach my $item (@numbers) {
-    print $item."\n" and my $count++;
-    break if $count >10;
-  }
+  my $count = (scalar @numbers > 9) ? 9 : (scalar @numbers) -1;
+  print map {$numbers[$_]."\n"} (0..$count);
+  close $IN_FILE;
 }
 
 sub print_keywords {
@@ -91,8 +90,8 @@ sub print_comments {
     push @comments, "$1" if /^(#[^!]+$)/;
     push @comments, "$1" if m{(?:^[^#]+?)(#[^/]+$)};
   }
-  my $number = (scalar @comments > 4) ? 4 : (scalar @comments) -1;
-  print map {$comments[$_]} (0..$number);
+  my $count = (scalar @comments > 4) ? 4 : (scalar @comments) -1;
+  print map {$comments[$_]} (0..$count);
   close $IN_FILE;
 }
 
@@ -103,8 +102,8 @@ sub print_strings {
   while (<$IN_FILE>) {
     push @strings, map {$_."\n"} /(".*?"|'.*?')/g
   }
-  my $number = (scalar @strings > 4) ? 4 : (scalar @strings) -1;
-  print map {$strings[$_]} (0..$number);
+  my $count = (scalar @strings > 4) ? 4 : (scalar @strings) -1;
+  print map {$strings[$_]} (0..$count);
   close $IN_FILE;
 }
 
