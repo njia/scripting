@@ -99,11 +99,13 @@ sub print_strings {
   open my $IN_FILE, "<", $_[0] or die "print_strings: Could not read from file $_[0]\n";
   print "[Strings]\n";
   my @strings = ();
-  while (<$IN_FILE>) {
-    push @strings, map {$_."\n"} /(".*?"|'.*?')/g
-  }
+  local $/ = undef;
+  my $content = <$IN_FILE>;
+
+  push @strings, $content =~ /(".*?"|'.*?')/sg;
+
   my $count = (scalar @strings > 4) ? 4 : (scalar @strings) -1;
-  print map {$strings[$_]} (0..$count);
+  print map {$strings[$_]."\n"} (0..$count);
   close $IN_FILE;
 }
 

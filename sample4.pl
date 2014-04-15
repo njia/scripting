@@ -15,6 +15,13 @@ my $test = -3.22;
 
 my $t = +.01;
 
+
+my $string = "this is a
+multi line string,
+";
+
+print $string;
+
 print "hello" if $ARGV[0];
 my $mad = 6_54_3.1_4_1_5_9_2 ;        # a very important number
 print $mad, "\n";
