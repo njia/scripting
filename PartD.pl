@@ -3,6 +3,7 @@
 use warnings;
 use strict;
 use 5.010;
+# use re "debug";
 
 # this sub will download Perl keyword html file from learn.perl.org and create keyword
 # list for Perl syntac, Perl functions and Perl find handles
@@ -39,11 +40,10 @@ sub get_keywords {
   return %key_words;
 }
 
-sub print_numbers {
+sub find_numbers {
   open my $IN_FILE, "<", $_[0] or die "print_keywords: Could not read from file $_[0]\n";
-  my @numbers = ();
+  my %numbers;
   my @words = ();
-  print "[Numbers]\n";
   while (<$IN_FILE>) {
     s/^(#[^!]+$)//;
     s{(^[^#]+?)(#[^/]+$)}{$1};
@@ -53,11 +53,11 @@ sub print_numbers {
 
   foreach my $item (@words) {
     next if $item =~ /^[^-|^+|^\d|^.]/;
-    push @numbers, $1 if $item =~ s/([-+]?([0-9_]+(\.[0-9_]+)?|[-+]?\.[0-9_]+)([eE]?[-+]?[0-9_]+)?)\b//;
-    push @numbers, $1 if $item =~ /((0[x|X][0-9a-fA-F_]+)|(0[0-7]+?)|(0[b|B][01_]+))/;
+    $numbers{$1}++ if $item =~ s/([-+]?([0-9_]+(\.[0-9_]+)?|[-+]?\.[0-9_]+)([eE]?[-+]?[0-9_]+)?)\b//;
+    $numbers{$1}++ if $item =~ /((0[x|X][0-9a-fA-F_]+)|(0[0-7]+?)|(0[b|B][01_]+))/;
   }
-
   close $IN_FILE;
+  return keys %numbers;
 }
 
 sub find_keywords {
@@ -73,7 +73,7 @@ sub find_keywords {
     }
   }
   close $IN_FILE;
-  my @key_words = keys %key_words;
+  return keys %key_words;
 }
 
 sub find_comments {
@@ -105,10 +105,10 @@ sub read_whole_file {
   return $content;
 }
 
-my $royalblue = '<style="color:#2B60DE">';
+my $string_color  = '<code style="color:#2B60DE">';
 my $keyward_color = '<code style="color:#08B000">';
-my $darkcyan  = '<style="color:#008B8B">';
-my $darkgreen = '<style="color:#006400">';
+my $number_color  = '<code style="color:#008B8B">';
+my $comment_color = '<code style="color:#006400">';
 my $colorend  = '</code>';
 
 my $input_file = $ARGV[0];
@@ -126,10 +126,37 @@ open my $OUT_FILE, ">", $output_file or die "Could not write to $output_file\n";
 
 my $file_content = &read_whole_file($input_file);
 my @kw = &find_keywords($input_file);
+my @comments = &find_comments($input_file);
+my @strings = &find_strings($input_file);
 
-foreach my $item (@kw) {
-  $file_content =~ s/\b($item)\b/$keyward_color$1$colorend/g;
+open my $IN_FILE, "<", $input_file or die "Could not read from $input_file\n";
+
+while (<$IN_FILE>) {
+  if (/^\s*#[^!]/) {
+    s/^/$comment_color/;
+    s/$/$colorend/;
+  }
 }
-print $OUT_FILE $file_content;
+
+# part D notes, do numbers first, if line starts with # jj
+
+$file_content =~ s/((0[x|X][0-9a-fA-F_]+)|(0[0-7]+?)|(0[b|B][01_]+))/$number_color$1$colorend/g;
+$file_content =~ s/(?<!["|\w|\[|:#])([-+]?(?!")([0-9_]+(\.[0-9_]+)?|[-+]?\.[0-9_]+)([eE]?[-+]?[0-9_]+)?)(?!\b#\b)/$number_color$1$colorend/g;
+
+# $file_content =~ s/((?<!["|\w|])\d+(?!))/$number_color$1$colorend/g;
+
+# foreach my $item (@kw) {
+#   $file_content =~ s/\b($item)\b/$keyward_color$1$colorend/g;
+# }
+
+  # $file_content =~ s/('.*'|".*")/$string_color$1$colorend/gm;
+  #
+
+  # $file_content =~ s/(^(?:\s*)?(#.*$)|^(?:(\s*)?[^#]+)(#.*$))/$comment_color$1$colorend/g;
+
+ # $file_content =~ s/^(?:\s+)(#[^!]+)/$comment_color$1$colorend/;
+ # $file_content =~ s{(?:^[^#]+?)(#[^/]+)}{$comment_color$1$colorend};
+
+print $OUT_FILE "<pre>\n".$file_content."\n</pre>";
 close $OUT_FILE;
 exit 0;
