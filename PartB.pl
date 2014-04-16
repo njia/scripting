@@ -79,7 +79,8 @@ sub print_strings {
   local $/ = undef;
   my $content = <$IN_FILE>;
 
-  push @strings, $content =~ /(".*?"|'.*?')/sg;
+  # push @strings, $content =~ /(".*?"|'.*?')/sg;
+  push @strings, $content =~ /"(?:[^\\"]|\\.)*"|'(?:[^\\"]|\\.)*'/gs;
 
   my $count = (scalar @strings > 4) ? 4 : (scalar @strings) -1;
   print map {$strings[$_]."\n"} (0..$count);
