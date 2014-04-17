@@ -50,7 +50,7 @@ sub print_keywords {
     foreach my $word (split) {
       $word =~ s/[^@\$%&a-zA-Z_-]//g;
       if ($perl_key_words{$word}) {
-        print $word, "\n" unless ($seen{$word} || ($number_of_keywords > 15));
+        print $word, "\n" unless ($seen{$word} || ($number_of_keywords >= 15));
         $number_of_keywords++ unless ($seen{$word});
         $seen{$word}++;
       }
