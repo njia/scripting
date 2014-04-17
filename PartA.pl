@@ -67,7 +67,7 @@ sub print_comments {
     push @comments, "$1" if /^(#[^!]+$)/;
     push @comments, "$1" if m{(?:^[^#]+?)(#[^/]+$)};
   }
-  my $number = (scalar @comments > 4) ? 4 : (scalar @comments ) -1;
+  my $number = (scalar @comments >= 5) ? 4 : (scalar @comments ) -1;
   print map {$comments[$_]} (0..$number);
   close $IN_FILE;
 }
@@ -80,7 +80,7 @@ sub print_strings {
     s/^([^#]*?)(#.*?$)/$1/ if /#/;
     push @strings, map {$_."\n"} /(".*?"|'.*?')/g
   }
-  my $number = (scalar @strings > 10) ? 10 : (scalar @strings) -1;
+  my $number = (scalar @strings >= 10) ? 9 : (scalar @strings) -1;
   print map {$strings[$_]} (0..$number);
   close $IN_FILE;
 }

@@ -73,7 +73,7 @@ sub print_keywords {
     foreach my $word (split) {
       $word =~ s/[^@\$%&a-zA-Z_-]//g;
       if ($perl_key_words{$word}) {
-        print $word, "\n" unless ($seen{$word} || ($number_of_keywords > 15));
+        print $word, "\n" unless ($seen{$word} || ($number_of_keywords >= 15));
         $number_of_keywords++ unless ($seen{$word});
         $seen{$word}++;
       }
@@ -90,7 +90,7 @@ sub print_comments {
     push @comments, "$1" if /^(#[^!]+$)/;
     push @comments, "$1" if m{(?:^[^#]+?)(#[^/]+$)};
   }
-  my $count = (scalar @comments > 4) ? 4 : (scalar @comments) -1;
+  my $count = (scalar @comments >= 5) ? 4 : (scalar @comments) -1;
   print map {$comments[$_]} (0..$count);
   close $IN_FILE;
 }
@@ -104,7 +104,7 @@ sub print_strings {
 
   push @strings, $content =~ /"(?:[^\\"]|\\.)*"|'(?:[^\\"]|\\.)*'/gs;
 
-  my $count = (scalar @strings > 4) ? 4 : (scalar @strings) -1;
+  my $count = (scalar @strings >= 10) ? 9 : (scalar @strings) -1;
   print map {$strings[$_]."\n"} (0..$count);
   close $IN_FILE;
 }
