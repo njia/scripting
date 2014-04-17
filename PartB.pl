@@ -39,15 +39,27 @@ sub get_keywords {
   return %key_words;
 }
 
-sub print_keywords {
-  open my $IN_FILE, "<", $_[0] or die "print_keywords: Could not read from file $_[0]\n";
+sub print_keywords_strings_comments {
+  my @strings  = &find_strings($_[0]);
+  my @comments = &find_comments($_[0]);
   my %perl_key_words = &get_keywords;
   my $number_of_keywords = 0;
   my %seen = ();
+  
+  open my $IN_FILE, "<", $_[0] or die "print_keywords: Could not read from file $_[0]\n";
+  local $/ = undef;
+  my $file_content = <$IN_FILE>;
+
+  foreach my $item (@strings) {
+    $file_content =~ s/$item//sg;
+  }
+
+  foreach my $item (@comments) {
+    $file_content =~ s/$item//g;
+  }
+
   print "[Keywords]\n";
-  while (<$IN_FILE>) {
-    chomp;
-    foreach my $word (split) {
+    foreach my $word (split " ", $file_content) {
       $word =~ s/[^@\$%&a-zA-Z_-]//g;
       if ($perl_key_words{$word}) {
         print $word, "\n" unless ($seen{$word} || ($number_of_keywords >= 15));
@@ -55,36 +67,39 @@ sub print_keywords {
         $seen{$word}++;
       }
     }
-  }
+
+    print "[Strings]\n";
+    my $count = (scalar @strings) >= 10 ? 9: (scalar @strings) -1;
+    print map {$strings[$_]."\n"} (0..$count);
+
+    print "[Comments]\n";
+    $count = (scalar @comments) >= 5 ? 4: (scalar @comments) -1;
+    print map {$comments[$_]} (0..$count);
+
   close $IN_FILE;
 }
 
-sub print_comments {
+sub find_comments {
   open my $IN_FILE, "<", $_[0] or die "print_comments: Could not read from file $_[0]\n";
-  print "[Comments]\n";
   my @comments = ();
   while (<$IN_FILE>) { # inline comments for test
     push @comments, "$1" if /^(#[^!]+$)/;
     push @comments, "$1" if m{(?:^[^#]+?)(#[^/]+$)};
   }
-  my $count = (scalar @comments >= 5) ? 4 : (scalar @comments) -1;
-  print map {$comments[$_]} (0..$count);
   close $IN_FILE;
+
+  return @comments;
 }
 
-sub print_strings {
+sub find_strings {
   open my $IN_FILE, "<", $_[0] or die "print_strings: Could not read from file $_[0]\n";
-  print "[Strings]\n";
   my @strings = ();
   local $/ = undef;
   my $content = <$IN_FILE>;
-
-  # push @strings, $content =~ /(".*?"|'.*?')/sg;
   push @strings, $content =~ /"(?:[^\\"]|\\.)*"|'(?:[^\\"]|\\.)*'/gs;
-
-  my $count = (scalar @strings >= 10) ? 9 : (scalar @strings) -1;
-  print map {$strings[$_]."\n"} (0..$count);
   close $IN_FILE;
+
+  return @strings;
 }
 
 my $input_file = $ARGV[0];
@@ -114,6 +129,4 @@ print "Lines: $lines\n";
 print "Words: ", scalar @words, "\n";
 print "Chars: ", scalar @chars, "\n";
 
-&print_keywords($input_file);
-&print_strings($input_file);
-&print_comments($input_file);
+&print_keywords_strings_comments($input_file);
