@@ -16,8 +16,8 @@ my %unique_strings;
 my %unique_comments;
 my %unique_keywords;
 
-my $fnumber_regex = qr{(?<!["|\w|\[|#])([-+]?([0-9_]+(\.[0-9_]+)?|[-+]?\.[0-9_]+)([eE]?[-+]?[0-9_]+)?)\b};
-my $bin_oct_hex = qr{((0[x|X][0-9a-fA-F_]+)|(0[0-7]+?)|(0[b|B][01_]+))};
+my $fnumber_regex = qr{(?<!['|"|\w|\[|#])([-+]?([0-9_]+(\.[0-9_]+)?|[-+]?\.[0-9_]+)([eE]?[-+]?[0-9_]+)?)(?!['|"|\w])};
+my $bin_oct_hex = qr{(0[x|X][0-9a-fA-F_]+)|(0[0-7]+?)|(0[b|B][01_]+)};
 my $dquo_re = qr{"(?:(?>[^"\\]+)|\\.)*"};
 my $squo_re = qr{'(?:(?>[^'\\]+)|\\.)*'};
 my $comment_re = qr{(?<!\$)#.*};
@@ -54,19 +54,26 @@ sub read_file {
   close $IN_FILE;
 }
 
-  &find_keywords($src);
-  foreach my $kw (keys %unique_keywords) {
-    $src =~ s/\b$kw\b/$keyward_color$kw$color_end/g;
-  }
 
   $src =~ s/($dquo_re)/$string_color$1$color_end/g;
   $src =~ s/($squo_re)/$string_color$1$color_end/g;
-  $src =~ s/($comment_re)/$string_color$1$color_end/g;
-  $src =~ s/($fnumber_regex|$bin_oct_hex)/$number_color$1$color_end/g;
+  $src =~ s/($comment_re)/$comment_color$1$color_end/g;
 
+  &find_keywords($src);
 
   open my $OUT_FILE, ">", $output_file or die "Could not write to $output_file\n";
-  print $OUT_FILE "<pre>".$src."</pre>";
+  print $OUT_FILE "<pre>\n";
+
+  foreach my $line (split "\n", $src) {
+    print $OUT_FILE $line."\n" and next if $line =~ /^\s*($comment_color)/;
+    foreach my $kw (keys %unique_keywords) {
+      $line =~ s/\b$kw\b/$keyward_color$kw$color_end/g;
+    }
+    $line =~ s/($fnumber_regex|$bin_oct_hex)/$number_color$1$color_end/g;
+    print $OUT_FILE $line."\n";
+  }
+
+  print $OUT_FILE "</pre>\n";
   close $OUT_FILE;
   exit 0;
 
