@@ -37,16 +37,14 @@ my $off_set = 0;
 
 &print_keywords_strings_comments($input_file);
 
-# this sub will download Perl keyword html file from learn.perl.org and create keyword
+# This sub will download Perl keyword html file from learn.perl.org and create keyword
 # list for Perl syntac, Perl functions and Perl find handles
 sub get_keywords {
   # Download the Perl keyword HTML file
   my $perl_keywords = `curl -s http://learn.perl.org/docs/keywords.html`;
-  # define start match for Perl file handle
-  # define start match for Perl functions
-  # define start match for Perl syntax
-  # all ends at </table>
-  # every keyword is between ">" and "</a>"
+  # Define start match for Perl filehandles, syntax and functions
+  # All keywords section ends at </table>
+  # And every keyword is between ">" and "</a>"
   my $handle_start   = "File Handles</h3>";
   my $function_start = ">Perl functions</h3>";
   my $syntax_start   = ">Perl syntax</h3>";
