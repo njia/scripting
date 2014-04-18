@@ -16,7 +16,7 @@ my %unique_strings;
 my %unique_comments;
 my %unique_keywords;
 
-my $fnumber_regex = qr{([-+]?([0-9_]+(\.[0-9_]+)?|[-+]?\.[0-9_]+)([eE]?[-+]?[0-9_]+)?)\b};
+my $fnumber_regex = qr{(?<!["|\w|\[|#])([-+]?([0-9_]+(\.[0-9_]+)?|[-+]?\.[0-9_]+)([eE]?[-+]?[0-9_]+)?)\b};
 my $bin_oct_hex = qr{((0[x|X][0-9a-fA-F_]+)|(0[0-7]+?)|(0[b|B][01_]+))};
 my $dquo_re = qr{"(?:(?>[^"\\]+)|\\.)*"};
 my $squo_re = qr{'(?:(?>[^'\\]+)|\\.)*'};
