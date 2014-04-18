@@ -175,3 +175,72 @@ sub next_char {
   # print "Next char is $has{$sorted_keys[0]}, and position is $sorted_keys[0]\n";
   return ($has{$sorted_keys[0]}, $sorted_keys[0]);
 }
+
+=head1 NAME
+
+SLP - Perl - Assignment 1::PartC 
+
+=head1 SYNOPSIS
+
+    ./PartC.pl scriptFileName
+    ./PartC.pl Hello.pl
+    ./PartC.pl Hello.pm
+
+=head1 DESCRIPTION
+
+This module is for scripting language programming assignment 1 PartC.
+It is to analyse another Perl script specified as the first argument.
+
+The Acceptable file extensions are .pl and .pm.
+
+=over 5
+
+=item 1 
+
+It displays the number of lines, words, and characters;
+
+=item 2
+
+Identify the keywords in the script file, and display in the order as they first appeared in the file.  If a keyword appeared multiple times, only the first instance should be displayed and display the first 15 keywords only;
+
+=item 3
+
+Identify the numbers in the script, display them in the order as they appeared in the file, only display the first 10 numbers. A number is a Perl numeric literal in any of the floating point or integer formats specified on L<http://perldoc.perl.org/perldata.html#Scalar-value-constructors> 
+
+=item 4
+
+Identify the strings in the script file, and display in the order as they appeared in the file, display the first 10 strings only;
+
+=item 5
+
+Identify the comments in the script file, display in the order as they appeared in the file, display the first 5 comments only.
+
+=back
+
+=head1 ASSUMPTIONS
+
+=over 4
+
+=item *
+
+Keywords appeared in strings and comments are not considered keywords;
+
+=item *
+
+a string may appear on multiple lines;
+
+=item *
+
+comments may appear inside strings or regular expressions;
+
+=item *
+
+single or double quoted strings may appear in comments;
+
+=back
+
+=head1 AUTHOR
+
+Haiyan Zhang
+
+=cut  
