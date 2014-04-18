@@ -203,6 +203,28 @@ Identify the comments in the script file, display in the order as they appeared 
 
 =back
 
+=head1 FUNCTIONS
+
+=over 12
+
+=item C<print_keywords_strings_comments>
+
+Print the keywords, strings, and comments appear in the input file;
+
+=item C<find_strings_comments>
+
+Find strings and comments;
+
+=item C<capture_string>
+
+Find single or double quotes strings and save them into string array;
+
+=item C<next_char>
+
+Find which special char appear first, the special char are: double quote, single quote and hash;
+
+=back
+
 =head1 ASSUMPTIONS
 
 =over 4
