@@ -168,13 +168,13 @@ sub next_char {
 
 =head1 NAME
 
-SLP - Perl - Assignment 1::PartA 
+SLP - Perl - Assignment 1::PartB 
 
 =head1 SYNOPSIS
 
-    ./PartA.pl scriptFileName
-    ./PartA.pl Hello.pl
-    ./PartA.pl Hello.pm
+    ./PartB.pl scriptFileName
+    ./PartB.pl Hello.pl
+    ./PartB.pl Hello.pm
 
 =head1 DESCRIPTION
 
