@@ -92,7 +92,7 @@ sub print_keywords_strings_comments {
 
   print "[Keywords]\n";
   foreach my $word (split " ", $src) {
-    if ($word =~ /^[-|+|\d|.]/) {
+    if ($word =~ /^[-|+|\d|.|\(]/) {
       push @numbers, $1 if $word =~ s/([-+]?([0-9_]+(\.[0-9_]+)?|[-+]?\.[0-9_]+)([eE]?[-+]?[0-9_]+)?)\b//;
       push @numbers, $1 if $word =~ /((0[x|X][0-9a-fA-F_]+)|(0[0-7]+?)|(0[b|B][01_]+))/;
     } else {
