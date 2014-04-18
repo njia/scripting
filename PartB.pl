@@ -4,6 +4,39 @@ use warnings;
 use strict;
 use 5.010;
 
+my $input_file = shift;
+die "Error: unable to analyse the specified file.\n" if !defined $input_file;
+chomp $input_file;
+
+unless ( $input_file =~ /.p[l|m]$/ && -R -f -s -T $input_file) {
+  die "Error: unable to analyse the specified file.\n";
+  exit 1;
+}
+
+print "File: $input_file\n";
+
+my $lines = 0;
+my @words = ();
+my @chars = ();
+
+open my $IN_FILE, "<", $input_file or die "Could not read from $input_file\n";
+  while (<$IN_FILE>) {
+    $lines = $. if eof;
+    push @words, split;
+    push @chars, split //, $_;
+  }
+
+print "Lines: $lines\n";
+print "Words: ", scalar @words, "\n";
+print "Chars: ", scalar @chars, "\n";
+
+my @strings = ();
+my @comments = ();
+my $src;
+my $off_set = 0;
+
+&print_keywords_strings_comments($input_file);
+
 # this sub will download Perl keyword html file from learn.perl.org and create keyword
 # list for Perl syntac, Perl functions and Perl find handles
 sub get_keywords {
@@ -40,26 +73,26 @@ sub get_keywords {
 }
 
 sub print_keywords_strings_comments {
-  my @strings  = &find_strings($_[0]);
-  my @comments = &find_comments($_[0]);
   my %perl_key_words = &get_keywords;
   my $number_of_keywords = 0;
   my %seen = ();
-  
+
   open my $IN_FILE, "<", $_[0] or die "print_keywords: Could not read from file $_[0]\n";
   local $/ = undef;
-  my $file_content = <$IN_FILE>;
+  $src = <$IN_FILE>;
+
+  &find_strings_comments;
 
   foreach my $item (@strings) {
-    $file_content =~ s/$item//sg;
+    $src =~ s/$item//sg;
   }
 
   foreach my $item (@comments) {
-    $file_content =~ s/$item//g;
+    $src =~ s/$item//g;
   }
 
   print "[Keywords]\n";
-    foreach my $word (split " ", $file_content) {
+    foreach my $word (split " ", $src) {
       $word =~ s/[^@\$%&a-zA-Z_-]//g;
       if ($perl_key_words{$word}) {
         print $word, "\n" unless ($seen{$word} || ($number_of_keywords >= 15));
@@ -73,60 +106,64 @@ sub print_keywords_strings_comments {
     print map {$strings[$_]."\n"} (0..$count);
 
     print "[Comments]\n";
-    $count = (scalar @comments) >= 5 ? 4: (scalar @comments) -1;
-    print map {$comments[$_]} (0..$count);
+    $count = 0;
+    foreach my $item (@comments) {
+      next if $item =~ /^#!/;
+      print "$item" and $count++ ;
+      last if $count >= 5;
+    }
 
   close $IN_FILE;
 }
 
-sub find_comments {
-  open my $IN_FILE, "<", $_[0] or die "print_comments: Could not read from file $_[0]\n";
-  my @comments = ();
-  while (<$IN_FILE>) { # inline comments for test
-    push @comments, "$1" if /^(#[^!]+$)/;
-    push @comments, "$1" if m{(?:^[^#]+?)(#[^/]+$)};
+sub  find_strings_comments {
+  my $end_index = 0;
+  while (my ($char, $start_index) = &next_char($off_set)) {
+    last if ($char eq "" && $start_index == -1);
+    if ($char eq '#') {
+      $end_index = index $src, "\n", $start_index + 1;
+      push @comments, substr($src, $start_index, $end_index-$start_index+1);
+      $off_set = $end_index + 1;
+    } elsif (($char eq '"') || ($char eq "'")) {
+      &capture_string($char, $start_index, $end_index);
+    }
   }
-  close $IN_FILE;
-
-  return @comments;
 }
 
-sub find_strings {
-  open my $IN_FILE, "<", $_[0] or die "print_strings: Could not read from file $_[0]\n";
-  my @strings = ();
-  local $/ = undef;
-  my $content = <$IN_FILE>;
-  push @strings, $content =~ /"(?:[^\\"]|\\.)*"|'(?:[^\\"]|\\.)*'/gs;
-  close $IN_FILE;
+sub capture_string($ $ $) {
+  my $quote = shift;
+  my $start_index = shift;
+  my $end_index = shift;
 
-  return @strings;
-}
+  $end_index = index ($src, $quote, $start_index+1);
+  my $char_before = substr $src, $end_index-1, 1;
 
-my $input_file = $ARGV[0];
-
-die "Error: unable to analyse the specified file.\n" if !defined $input_file;
-chomp $input_file;
-
-unless ( $input_file =~ /.p[l|m]$/ && -R -f -s -T $input_file) {
-  die "Error: unable to analyse the specified file.\n";
-  exit 1;
-}
-
-print "File: $input_file\n";
-
-my $lines = 0;
-my @words = ();
-my @chars = ();
-
-open my $IN_FILE, "<", $input_file or die "Could not read from $input_file\n";
-  while (<$IN_FILE>) {
-    $lines = $. if eof;
-    push @words, split;
-    push @chars, split //, $_;
+  while ($end_index > 0 && $char_before eq '\\') {
+    $end_index = index $src, $quote, $end_index + 1;
+    $char_before = substr $src, $end_index-1, 1;
   }
 
-print "Lines: $lines\n";
-print "Words: ", scalar @words, "\n";
-print "Chars: ", scalar @chars, "\n";
+  push @strings, substr($src, $start_index, $end_index-$start_index+1);
+  $off_set = $end_index + 1;
+}
 
-&print_keywords_strings_comments($input_file);
+sub next_char {
+  my %has;
+  my $position = shift;
+
+  my $s_index = index $src, "'", $position;
+  my $d_index = index $src, '"', $position;
+  my $c_index = index $src, '#', $position;
+
+  return ("", -1) if ($s_index == -1 &&
+                      $d_index == -1 &&
+                      $c_index == -1);
+
+  $has{$s_index} = "'" if ($s_index >= 0);
+  $has{$d_index} = '"' if ($d_index >= 0);
+  $has{$c_index} = '#' if ($c_index >= 0);
+
+  my @sorted_keys = sort { $a <=> $b} keys %has;
+  print "Next char is $has{$sorted_keys[0]}, and position is $sorted_keys[0]\n";
+  return ($has{$sorted_keys[0]}, $sorted_keys[0]);
+}
