@@ -4,113 +4,7 @@ use warnings;
 use strict;
 use 5.010;
 
-# this sub will download Perl keyword html file from learn.perl.org and create keyword
-# list for Perl syntac, Perl functions and Perl find handles
-sub get_keywords {
-  # Download the Perl keyword HTML file
-  my $perl_keywords = `curl -s http://learn.perl.org/docs/keywords.html`;
-  # define start match for Perl file handle
-  # define start match for Perl functions
-  # define start match for Perl syntax
-  # all ends at </table>
-  # every keyword is between ">" and "</a>"
-  my $handle_start   = "File Handles</h3>";
-  my $function_start = ">Perl functions</h3>";
-  my $syntax_start   = ">Perl syntax</h3>";
-  my $end_capture = "</table>";
-  my $key_words_start = '">';
-  my $key_words_end  = "</a>";
-
-  # Match all Perl find handls (still with HTML tags)
-  # Assign capture group to $temp as $1 is read only
-  # All file handls are in upper case, so extract upper case words
-  $perl_keywords =~ /(?:$handle_start)(.+?)(?:$end_capture)/s;
-  my $temp = $1;
-  my @filehandle_keyword_list = $temp =~ /(?:$key_words_start)([A-Z]+?)(?:$key_words_end)/gs;
-
-  $perl_keywords =~ /(?:$function_start)(.+?)(?:$end_capture)/s;
-  $temp = $1;
-  my @function_keywoard_list = $temp =~ /(?:$key_words_start)([_a-zA-Z\-]+?)(?:$key_words_end)/gs;
-
-  $perl_keywords =~ /(?:$syntax_start)(.+?)(?:$end_capture)/s;
-  $temp = $1;
-  my @syntax_keywrod_list = $temp =~ /(?:$key_words_start)([_a-zA-Z\-]+?)(?:$key_words_end)/gs;
-  my %key_words = map { $_ => 1 } (@filehandle_keyword_list, @function_keywoard_list,  @syntax_keywrod_list);
-  return %key_words;
-}
-
-sub print_numbers {
-  open my $IN_FILE, "<", $_[0] or die "print_keywords: Could not read from file $_[0]\n";
-  my @numbers = ();
-  my @words = ();
-  print "[Numbers]\n";
-  while (<$IN_FILE>) {
-    s/^(#[^!]+$)//;
-    s{(^[^#]+?)(#[^/]+$)}{$1};
-    s/('.*?'|".*?")//g;
-    push @words, split;
-  }
-
-  foreach my $item (@words) {
-    next if $item =~ /^[^-|^+|^\d|^.]/;
-    push @numbers, $1 if $item =~ s/([-+]?([0-9_]+(\.[0-9_]+)?|[-+]?\.[0-9_]+)([eE]?[-+]?[0-9_]+)?)\b//;
-    push @numbers, $1 if $item =~ /((0[x|X][0-9a-fA-F_]+)|(0[0-7]+?)|(0[b|B][01_]+))/;
-  }
-
-  my $count = (scalar @numbers > 9) ? 9 : (scalar @numbers) -1;
-  print map {$numbers[$_]."\n"} (0..$count);
-  close $IN_FILE;
-}
-
-sub print_keywords {
-  open my $IN_FILE, "<", $_[0] or die "print_keywords: Could not read from file $_[0]\n";
-  my %perl_key_words = &get_keywords;
-  my $number_of_keywords = 0;
-  my %seen = ();
-  print "[Keywords]\n";
-  while (<$IN_FILE>) {
-    chomp;
-    foreach my $word (split) {
-      $word =~ s/[^@\$%&a-zA-Z_-]//g;
-      if ($perl_key_words{$word}) {
-        print $word, "\n" unless ($seen{$word} || ($number_of_keywords >= 15));
-        $number_of_keywords++ unless ($seen{$word});
-        $seen{$word}++;
-      }
-    }
-  }
-  close $IN_FILE;
-}
-
-sub print_comments {
-  open my $IN_FILE, "<", $_[0] or die "print_comments: Could not read from file $_[0]\n";
-  print "[Comments]\n";
-  my @comments = ();
-  while (<$IN_FILE>) { # inline comments for test
-    push @comments, "$1" if /^(#[^!]+$)/;
-    push @comments, "$1" if m{(?:^[^#]+?)(#[^/]+$)};
-  }
-  my $count = (scalar @comments >= 5) ? 4 : (scalar @comments) -1;
-  print map {$comments[$_]} (0..$count);
-  close $IN_FILE;
-}
-
-sub print_strings {
-  open my $IN_FILE, "<", $_[0] or die "print_strings: Could not read from file $_[0]\n";
-  print "[Strings]\n";
-  my @strings = ();
-  local $/ = undef;
-  my $content = <$IN_FILE>;
-
-  push @strings, $content =~ /"(?:[^\\"]|\\.)*"|'(?:[^\\"]|\\.)*'/gs;
-
-  my $count = (scalar @strings >= 10) ? 9 : (scalar @strings) -1;
-  print map {$strings[$_]."\n"} (0..$count);
-  close $IN_FILE;
-}
-
-my $input_file = $ARGV[0];
-
+my $input_file = shift;
 die "Error: unable to analyse the specified file.\n" if !defined $input_file;
 chomp $input_file;
 
@@ -136,7 +30,148 @@ print "Lines: $lines\n";
 print "Words: ", scalar @words, "\n";
 print "Chars: ", scalar @chars, "\n";
 
-&print_keywords($input_file);
-&print_numbers($input_file);
-&print_strings($input_file);
-&print_comments($input_file);
+my @strings = ();
+my @comments = ();
+my @numbers = ();
+my $src;
+my $off_set = 0;
+
+&print_keywords_strings_comments($input_file);
+
+# This sub will download Perl keyword html file from learn.perl.org and create keyword
+# list for Perl syntac, Perl functions and Perl find handles
+sub get_keywords {
+  # Download the Perl keyword HTML file
+  my $perl_keywords = `curl -s http://learn.perl.org/docs/keywords.html`;
+  # Define start match for Perl filehandles, syntax and functions
+  # All keywords section ends at </table>
+  # And every keyword is between ">" and "</a>"
+  my $handle_start   = "File Handles</h3>";
+  my $function_start = ">Perl functions</h3>";
+  my $syntax_start   = ">Perl syntax</h3>";
+  my $end_capture = "</table>";
+  my $key_words_start = '">';
+  my $key_words_end  = "</a>";
+
+  # Match all Perl find handls (still with HTML tags)
+  # Assign capture group to $temp as $1 is read only
+  # All file handls are in upper case, so extract upper case words
+  $perl_keywords =~ /(?:$handle_start)(.+?)(?:$end_capture)/s;
+  my $temp = $1;
+  my @filehandle_keyword_list = $temp =~ /(?:$key_words_start)([A-Z]+?)(?:$key_words_end)/gs;
+
+  $perl_keywords =~ /(?:$function_start)(.+?)(?:$end_capture)/s;
+  $temp = $1;
+  my @function_keywoard_list = $temp =~ /(?:$key_words_start)([_a-zA-Z\-]+?)(?:$key_words_end)/gs;
+
+  $perl_keywords =~ /(?:$syntax_start)(.+?)(?:$end_capture)/s;
+  $temp = $1;
+  my @syntax_keywrod_list = $temp =~ /(?:$key_words_start)([_a-zA-Z\-]+?)(?:$key_words_end)/gs;
+  my %key_words = map { $_ => 1 } (@filehandle_keyword_list, @function_keywoard_list,  @syntax_keywrod_list);
+  return %key_words;
+}
+
+sub print_keywords_strings_comments {
+  my %perl_key_words = &get_keywords;
+  my $number_of_keywords = 0;
+  my %seen = ();
+
+  open my $IN_FILE, "<", $_[0] or die "print_keywords: Could not read from file $_[0]\n";
+  local $/ = undef;
+  $src = <$IN_FILE>;
+
+  &find_strings_comments;
+
+  foreach my $item (@strings) {
+    $src =~ s/$item//g;
+  }
+
+  foreach my $item (@comments) {
+    $src =~ s/$item//g;
+  }
+
+  print "[Keywords]\n";
+  foreach my $word (split " ", $src) {
+    if ($word =~ /^[-|+|\d|.]/) {
+      push @numbers, $1 if $word =~ s/([-+]?([0-9_]+(\.[0-9_]+)?|[-+]?\.[0-9_]+)([eE]?[-+]?[0-9_]+)?)\b//;
+      push @numbers, $1 if $word =~ /((0[x|X][0-9a-fA-F_]+)|(0[0-7]+?)|(0[b|B][01_]+))/;
+    } else {
+      $word =~ s/[^@\$%&a-zA-Z_-]//g;
+      if ($perl_key_words{$word}) {
+        print $word, "\n" unless ($seen{$word} || ($number_of_keywords >= 15));
+        $number_of_keywords++ unless ($seen{$word});
+        $seen{$word}++;
+      }
+    }
+  }
+
+  print "[Numbers]\n";
+  my $count = (scalar @numbers) > 9 ? 9: (scalar @numbers) -1;
+  print map {$numbers[$_]."\n"} (0..$count);
+
+  print "[Strings]\n";
+  $count = (scalar @strings) > 9 ? 9: (scalar @strings) -1;
+  print map {$strings[$_]."\n"} (0..$count);
+
+  print "[Comments]\n";
+  $count = 0;
+  foreach my $item (@comments) {
+    next if $item =~ /^#!/;
+    print "$item" and $count++ ;
+    last if $count >= 5;
+  }
+
+  close $IN_FILE;
+}
+
+sub  find_strings_comments {
+  my $end_index = 0;
+  while (my ($char, $start_index) = &next_char($off_set)) {
+    last if ($char eq "" && $start_index == -1);
+    if ($char eq '#') {
+      $end_index = index $src, "\n", $start_index + 1;
+      push @comments, substr($src, $start_index, $end_index-$start_index+1);
+      $off_set = $end_index + 1;
+    } elsif (($char eq '"') || ($char eq "'")) {
+      &capture_string($char, $start_index, $end_index);
+    }
+  }
+}
+
+sub capture_string($ $ $) {
+  my $quote = shift;
+  my $start_index = shift;
+  my $end_index = shift;
+
+  $end_index = index ($src, $quote, $start_index+1);
+  my $char_before = substr $src, $end_index-1, 1;
+
+  while ($end_index > 0 && $char_before eq '\\') {
+    $end_index = index $src, $quote, $end_index + 1;
+    $char_before = substr $src, $end_index-1, 1;
+  }
+
+  push @strings, substr($src, $start_index, $end_index-$start_index+1);
+  $off_set = $end_index + 1;
+}
+
+sub next_char {
+  my %has;
+  my $position = shift;
+
+  my $s_index = index $src, "'", $position;
+  my $d_index = index $src, '"', $position;
+  my $c_index = index $src, '#', $position;
+
+  return ("", -1) if ($s_index == -1 &&
+    $d_index == -1 &&
+    $c_index == -1);
+
+  $has{$s_index} = "'" if ($s_index >= 0);
+  $has{$d_index} = '"' if ($d_index >= 0);
+  $has{$c_index} = '#' if ($c_index >= 0);
+
+  my @sorted_keys = sort { $a <=> $b} keys %has;
+  # print "Next char is $has{$sorted_keys[0]}, and position is $sorted_keys[0]\n";
+  return ($has{$sorted_keys[0]}, $sorted_keys[0]);
+}

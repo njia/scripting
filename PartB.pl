@@ -82,7 +82,7 @@ sub print_keywords_strings_comments {
   &find_strings_comments;
 
   foreach my $item (@strings) {
-    $src =~ s/$item//sg;
+    $src =~ s/$item//g;
   }
 
   foreach my $item (@comments) {
@@ -162,6 +162,6 @@ sub next_char {
   $has{$c_index} = '#' if ($c_index >= 0);
 
   my @sorted_keys = sort { $a <=> $b} keys %has;
-  print "Next char is $has{$sorted_keys[0]}, and position is $sorted_keys[0]\n";
+  # print "Next char is $has{$sorted_keys[0]}, and position is $sorted_keys[0]\n";
   return ($has{$sorted_keys[0]}, $sorted_keys[0]);
 }
