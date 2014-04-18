@@ -70,13 +70,20 @@ sub next_char {
 }
 
 
+my $windows_path = "C:\\somewhere\\not\\important\\"; # and a comment by Miller ", yep
+print "$windows_path \n";
+
 __DATA__
 # this is a comment, should be matched.
 # # "I am not a string" . 'because I am inside a comment'
 my $string = " #I am not a comment, because I am quoted";
 my $another_string = "I am a multiline string with # on
                       each line #, have fun!";
-my $descap_string = "I am a \ escaped \" \"string"; # and some comments;
-my $sescap_string = 'I am a \ escaped \' \'string'; # and some comments;
+my $descap_string = "I am a \ escaped \" \"string"; # and some comments after double;
+my $sescap_string = 'I am a \ escaped \' \'string'; # and some comments after single;
+my $sescap_string = 'I am a \ escaped \\' \'\'\'\'\\\'; # and some ' comments by Miller;
+my $windows_path = "C:\\somewhere\\not\\important\\"; # and a comment ", yep
+    my @array = (1..12);
 my $empty_d ="";
 my $empty_s ='';
+
