@@ -32,10 +32,11 @@ select $OUT_FILE;
 
 print "<pre>\n";
 
-while ($char = (substr $src, $off_set, 1)) {
-  print STDOUT $char."\n";
-  print STDOUT "offerset is $off_set \n";
-  print STDOUT "length of string is ", length $src, "\n";
+while ($off_set < (length $src)) {
+  $char = substr $src, $off_set, 1;
+  # print STDOUT $char."\n";
+  # print STDOUT "offerset is $off_set \n";
+  # print STDOUT "length of string is ", length $src, "\n";
 
   if ($char eq '#') {
     $end_index = index $src, "\n", $off_set+ 1;
@@ -51,14 +52,11 @@ while ($char = (substr $src, $off_set, 1)) {
     }
     my $s = substr($src, $off_set, $end_index-$off_set+1);
     print $string_color.$s.$color_end;
-  } elsif ( $char eq '' ) {
-    print "0";
   } else {
     print $char;
     $end_index++;
   }
     $off_set = $end_index + 1;
-    # last if $off_set == (length $src) -2;
 }
 
 print "\n</pre>\n";
