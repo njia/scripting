@@ -145,6 +145,30 @@ Identify the comments in the script file, display in the order as they appeared 
 
 =back
 
+=head1 FUNCTIONS
+
+=over 12
+
+=item C<get_keywords>
+
+Return the hash containing keywords
+
+This function download Perl keyword html file from learn.perl.org and create keyword;
+
+=item C<print_keywords>
+ 
+Print the first 15 keywords in the order as they appear;
+
+=item C<print_comments>
+
+Print the first 5 comments in the order as they appear;
+
+=item C<print_strings>
+
+Print the first 10 comments in the order as they appear;
+
+=back
+
 =head1 ASSUMPTIONS
 
 =over 4
@@ -166,6 +190,7 @@ comments do not appear inside strings or regular expressions;
 single or double quoted strings do not appear in comments;
 
 =back
+
 
 =head1 AUTHOR
 
