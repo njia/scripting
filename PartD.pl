@@ -155,3 +155,86 @@ sub get_keywords {
   return %key_words;
 }
 
+=head1 NAME
+
+SLP - Perl - Assignment 1::PartD 
+
+=head1 SYNOPSIS
+
+    ./PartD.pl scriptFileName outputHtmlFile
+    ./PartD.pl Hello.pl out.html
+    ./PartD.pl Hello.pm out.html
+
+=head1 DESCRIPTION
+
+This module is for scripting language programming assignment 1 PartD.
+It is to analyse another Perl script specified as the first argument,
+and highlight keywords, numbers, strings and comments, save to the out put html file.
+
+The Acceptable file extensions are .pl and .pm.
+
+=over 5
+
+=item 1 
+
+Keywords will be highlighted to darkred;
+
+=item 2
+
+Numbers will be highlighted to darkcyan;
+
+=item 3
+
+Strings will be highlighted to royalblue;
+
+=item 4
+
+Comments will be highlighted to darkgreen;
+
+=back
+
+=head1 FUNCTIONS
+
+=over 12
+
+=item C<read_file>
+
+This function read the input file into memory; 
+
+=item C<find_keywords>
+
+Find the keywords, and store into the keywords hash. 
+
+=item C<get_keywords>
+
+Download Perl keyword html file from learn.perl.org and creat keyword list for Perl syntac, functions and file handles;
+
+=back
+
+=head1 ASSUMPTIONS
+
+=over 4
+
+=item *
+
+Keywords appeared in strings and comments are not considered keywords;
+
+=item *
+
+a string may appear on multiple lines;
+
+=item *
+
+comments may appear inside strings or regular expressions;
+
+=item *
+
+single or double quoted strings may appear in comments;
+
+=back
+
+=head1 AUTHOR
+
+Haiyan Zhang
+
+=cut  
