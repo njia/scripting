@@ -11,6 +11,7 @@ my $end_index = 0;
 
 while (my ($char, $start_index) = &next_char($off_set)) {
   last if ($char eq "" && $start_index == -1);
+  last if $end_index < 0;
 
   if ($char eq '#') {
     $end_index = index $src, "\n", $start_index + 1;
@@ -27,11 +28,21 @@ sub capture_string($ $ $) {
   my $end_index = shift;
 
   $end_index = index ($src, $quote, $start_index+1);
-  my $char_before = substr $src, $end_index-1, 1;
 
-  while ($end_index > 0 && $char_before eq '\\') {
-    $end_index = index $src, $quote, $end_index + 1;
-    $char_before = substr $src, $end_index-1, 1;
+  CHECK_BACKSLASH:
+  my $char_before = substr $src, $end_index-1, 1;
+  # print "\$char_before is $char_before\n";
+
+  if ($char_before eq '\\') {
+    # print "There is a \\ before $quote\n";
+    # print "end index before checking backslash $end_index \n";
+
+    if (&odd_number_backslash($char_before, $start_index, $end_index) == 1) {
+      # print "end index after checking backslash $end_index \n";
+      $end_index = index $src, $quote, $end_index + 1;
+      # print "end index after checking backslash and another index $end_index \n";
+      goto CHECK_BACKSLASH;
+    }
   }
 
   push @strings, substr($src, $start_index, $end_index-$start_index+1);
@@ -47,6 +58,31 @@ print "[Comments]\n";
 foreach my $item (@comments) {
   print "$item";
 }
+
+sub odd_number_backslash($ $ $) {
+  my $char_before = shift;
+  my $start_index = shift;
+  my $end_index = shift;
+  my $count = 0;
+
+  if ($char_before eq '\\') {
+    my $ts = substr $src, $start_index, $end_index-$start_index;
+    # print "\$ts is $ts\n";
+    while ($count <= length $ts) {
+      if (chop $ts eq '\\') {
+        $count++;
+      } else {
+        last;
+      }
+    }
+    # print "\$count is $count\n";
+    return ($count % 2);
+  } else {
+    # print "else \$count is $count\n";
+    return 1;
+  }
+}
+
 
 sub next_char {
   my %has;
@@ -69,11 +105,9 @@ sub next_char {
   return ($has{$sorted_keys[0]}, $sorted_keys[0]);
 }
 
-
-my $windows_path = "C:\\somewhere\\not\\important\\"; # and a comment by Miller ", yep
-print "$windows_path \n";
-
 __DATA__
+my $string = "this is a \" string";
+my $windows_path = "C:\\somewhere\\not\\important\\"; # and a comment " yep
 # this is a comment, should be matched.
 # # "I am not a string" . 'because I am inside a comment'
 my $string = " #I am not a comment, because I am quoted";
