@@ -11,7 +11,6 @@ my $end_index = 0;
 
 while (my ($char, $start_index) = &next_char($off_set)) {
   last if ($char eq "" && $start_index == -1);
-  last if $end_index < 0;
 
   if ($char eq '#') {
     $end_index = index $src, "\n", $start_index + 1;
@@ -115,7 +114,7 @@ my $another_string = "I am a multiline string with # on
                       each line #, have fun!";
 my $descap_string = "I am a \ escaped \" \"string"; # and some comments after double;
 my $sescap_string = 'I am a \ escaped \' \'string'; # and some comments after single;
-my $sescap_string = 'I am a \ escaped \\' \'\'\'\'\\\'; # and some ' comments by Miller;
+my $sescap_string = 'I am a \ escaped \' \'\'\'\'\\'; # and some ' comments by Miller;
 my $windows_path = "C:\\somewhere\\not\\important\\"; # and a comment ", yep
     my @array = (1..12);
 my $empty_d ="";
