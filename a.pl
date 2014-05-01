@@ -39,8 +39,7 @@ sub capture_comment($) {
     $off_set = $end_index + 1;
   } else {
     $off_set = $start_index + 1;
-    # print "Arry index variable found\n";
-    next;
+    # print "Array index variable found\n";
   }
 }
 
