@@ -13,11 +13,34 @@ while (my ($char, $start_index) = &next_char($off_set)) {
   last if ($char eq "" && $start_index == -1);
 
   if ($char eq '#') {
+    &capture_comment($start_index);
+  } elsif (($char eq '"') || ($char eq "'")) {
+    &capture_string($char, $start_index, $end_index);
+  }
+}
+
+print "[Strings]\n";
+foreach my $item (@strings) {
+  print "$item\n";
+}
+
+print "[Comments]\n";
+foreach my $item (@comments) {
+  print "$item";
+}
+
+sub capture_comment($) {
+  my $start_index = shift;
+  my $char_before = substr $src, $start_index-1, 1;
+  # print "\$char_before before # is $char_before\n";
+  if ((substr $src, $start_index-1, 1) ne "\$") {
     $end_index = index $src, "\n", $start_index + 1;
     push @comments, substr($src, $start_index, $end_index-$start_index+1);
     $off_set = $end_index + 1;
-  } elsif (($char eq '"') || ($char eq "'")) {
-    &capture_string($char, $start_index, $end_index);
+  } else {
+    $off_set = $start_index + 1;
+    # print "Arry index variable found\n";
+    next;
   }
 }
 
@@ -48,16 +71,6 @@ sub capture_string($ $ $) {
   $off_set = $end_index + 1;
 }
 
-print "[Strings]\n";
-foreach my $item (@strings) {
-  print "$item\n";
-}
-
-print "[Comments]\n";
-foreach my $item (@comments) {
-  print "$item";
-}
-
 sub odd_number_backslash($ $ $) {
   my $char_before = shift;
   my $start_index = shift;
@@ -81,7 +94,6 @@ sub odd_number_backslash($ $ $) {
     return 1;
   }
 }
-
 
 sub next_char {
   my %has;
@@ -112,6 +124,8 @@ my $windows_path = "C:\\somewhere\\not\\important\\"; # and a comment " yep
 my $string = " #I am not a comment, because I am quoted";
 my $another_string = "I am a multiline string with # on
                       each line #, have fun!";
+my @list = (0..99);
+print $#list;
 my $descap_string = "I am a \ escaped \" \"string"; # and some comments after double;
 my $sescap_string = 'I am a \ escaped \' \'string'; # and some comments after single;
 my $sescap_string = 'I am a \ escaped \' \'\'\'\'\\'; # and some ' comments by Miller;
