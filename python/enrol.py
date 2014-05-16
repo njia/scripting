@@ -7,8 +7,11 @@ class Enrol:
     self.subs = {}
     self.directory = dirname
     self.sub_filename = os.path.join(self.directory, "SUBJECTS")
-    alllines = utility.readlines(self.sub_filename)
-    for line in alllines:
+    self.class_fname  = os.path.join(self.directory, "CLASSES")
+    self.allsubs = utility.readlines(self.sub_filename)
+    self.allclasses = utility.readlines(self.class_fname)
+    print self.allclasses
+    for line in self.allsubs:
       code, name = line.split(":")
       self.subs[code] = name
 
@@ -22,3 +25,8 @@ class Enrol:
       return self.subs[code]
     else:
       return
+
+  def classes(self, class_id):
+    for line in self.allclasses:
+      if (class_id in line):
+        print line.split(":")[0]
