@@ -27,16 +27,17 @@ def readtable(filename):
 def writelines(filename, lines):
   tmpfile = str(time.time())
   try:
-    f = open('%s' % tmpfile, "w")
-    f.write(lines + "\n")
+    with open('%s' % tmpfile, "w") as f:
+      f.write(lines + "\n")
   except IOError:
-    f.close
     shutil.rmtree(tmpfile)
-    return 0
+    value = 0
   else:
-    f.close
     shutil.move(tmpfile, filename)
-    return 1
+    value = 1
+  finally:
+    f.close
+    return value
 
 
 
