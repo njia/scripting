@@ -2,6 +2,7 @@
 import re
 import time
 import shutil
+import os
 
 def readlines(filename):
   f = open('%s' % filename, "r")
@@ -38,7 +39,3 @@ def writelines(filename, lines):
   finally:
     f.close
     return value
-
-
-
-
