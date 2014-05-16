@@ -36,6 +36,7 @@ def writelines(filename, lines):
   else:
     f.close
     shutil.move(tmpfile, filename)
+    return 1
 
 
 
