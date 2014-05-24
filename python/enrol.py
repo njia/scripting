@@ -13,10 +13,15 @@ class Enrol:
     self.allsubs = utility.readlines(self.sub_filename)
     self.allclasses = utility.readlines(self.class_fname)
 
-    print self.allclasses
     for line in self.allsubs:
       code, name = line.split(":")
       self.subs[code] = name
+
+  def get_student(self, class_name):
+    filename = os.path.join(self.directory, (class_name + ".roll"))
+    student_list = []
+    student_list = utility.readlines(filename)
+    return student_list
 
   def subjects(self):
     mylist = list(self.subs.keys())
@@ -46,6 +51,7 @@ class Enrol:
         class_info = (line.split(":")[0], line.split(":")[2], line.split(":")[3], line.split(":")[4])
 
     if len(class_info) > 0:
-      return class_info
+      student_list = self.get_student(class_id)
+      return (class_info, student_list)
     else:
       raise KeyError("Class not found")
