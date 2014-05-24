@@ -2,6 +2,7 @@
 import utility
 import os
 import keyerror
+import glob
 
 class Enrol:
   def __init__(self, dirname):
@@ -12,12 +13,28 @@ class Enrol:
     self.class_fname  = os.path.join(self.directory, "CLASSES")
     self.allsubs = utility.readlines(self.sub_filename)
     self.allclasses = utility.readlines(self.class_fname)
+    self.class_stundet_files = glob.glob(os.path.join(self.directory, "*.roll"))
 
     for line in self.allsubs:
       code, name = line.split(":")
       self.subs[code] = name
 
-  def get_student(self, class_name):
+  def checkStudent(self, student_id, subject_id = ""):
+    class_list = []
+    if not subject_id:
+      for filename in self.class_stundet_files:
+        if student_id in open('%s' %filename).read():
+          filename = os.path.basename(filename)
+          class_list.append(filename[:-5])
+    else:
+      for a_class in self.classes(subject_id):
+        if student_id in open('%s' %a_class+".roll").read():
+          a_class = os.path.basename(a_class)
+          class_list.append(a_class)
+
+    return class_list
+
+  def students_of_class(self, class_name):
     filename = os.path.join(self.directory, (class_name + ".roll"))
     student_list = []
     student_list = utility.readlines(filename)
@@ -51,7 +68,7 @@ class Enrol:
         class_info = (line.split(":")[0], line.split(":")[2], line.split(":")[3], line.split(":")[4])
 
     if len(class_info) > 0:
-      student_list = self.get_student(class_id)
+      student_list = self.students_of_class(class_id)
       return (class_info, student_list)
     else:
       raise KeyError("Class not found")
