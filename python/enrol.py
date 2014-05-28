@@ -1,8 +1,10 @@
 #!/usr/bin/python
-import utility
 import os
 import keyerror
 import glob
+import time
+import shutil
+import re
 
 class Enrol:
   def __init__(self, dirname):
@@ -11,8 +13,8 @@ class Enrol:
     self.directory = dirname
     self.sub_filename = os.path.join(self.directory, "SUBJECTS")
     self.class_fname  = os.path.join(self.directory, "CLASSES")
-    self.allsubs = utility.readlines(self.sub_filename)
-    self.allclasses = utility.readlines(self.class_fname)
+    self.allsubs = readlines(self.sub_filename)
+    self.allclasses = readlines(self.class_fname)
     self.class_stundet_files = glob.glob(os.path.join(self.directory, "*.roll"))
 
     for line in self.allsubs:
@@ -37,7 +39,7 @@ class Enrol:
   def students_of_class(self, class_name):
     filename = os.path.join(self.directory, (class_name + ".roll"))
     student_list = []
-    student_list = utility.readlines(filename)
+    student_list = readlines(filename)
     return student_list
 
   def subjects(self):
@@ -59,16 +61,57 @@ class Enrol:
     if len(self.class_list) > 0:
       return self.class_list
     else:
-      raise KeyError("Not Found")
+      raise KeyError()
 
-  def classinfo(self, class_id):
-    class_info = []
+  def classInfo(self, class_id):
+    sub_name = ""
     for line in self.allclasses:
       if (class_id in line):
-        class_info = (line.split(":")[0], line.split(":")[2], line.split(":")[3], line.split(":")[4])
+        sub_name = line.split(":")[0].split(".")[0]
+        class_date = line.split(":")[2]
+        class_room = line.split(":")[3]
+        class_tutor = line.split(":")[4]
+        student_list = self.students_of_class(class_id)
 
-    if len(class_info) > 0:
-      student_list = self.students_of_class(class_id)
-      return (class_info, student_list)
+    if (sub_name):
+      return (sub_name, class_date, class_room, class_tutor, student_list)
     else:
       raise KeyError("Class not found")
+
+def readlines(filename):
+  f = open('%s' % filename, "r")
+  myLines = []
+  for line in f:
+    if (re.search('^\s*#', line)):
+      continue
+    else:
+      myLines.append(line.strip())
+
+  f.close
+  return myLines
+
+def readtable(filename):
+  f = open('%s' % filename, "r")
+  myLines = []
+  for line in f:
+    myLines.append(line.strip().split(":"))
+
+  f.close
+  return myLines
+
+def writelines(filename, lines):
+  tmpfile = str(time.time())
+  try:
+    with open('%s' % tmpfile, "w") as f:
+      for line in lines:
+        f.write(line + "\n")
+  except IOError:
+    f.close
+    shutil.rmtree(tmpfile)
+    value = 0
+    return value
+  else:
+    f.close
+    shutil.move(tmpfile, filename)
+    value = 1
+    return value
