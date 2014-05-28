@@ -138,17 +138,18 @@ class Enrol:
       filename = os.path.join(self.directory, (a_class + ".roll"))
       student_list_of_a_class = readlines(filename)
       if student_id in student_list_of_a_class:
-        # print "found student %s in class %s " %(student_id, a_class)
         student_list_of_a_class.remove(student_id)
-        # type(student_list_of_a_class)
         writelines(filename, student_list_of_a_class)
 
     filename = os.path.join(self.directory, (class_id + ".roll"))
     student_list_of_class = readlines(filename)
-    student_list_of_class.append(student_id)
-    writelines(filename, student_list_of_class)
-
-    return 1
+    class_room = self.class_to_room[class_id]
+    if (int(self.classroom_venuse[class_room]) > len(student_list_of_class)):
+      student_list_of_class.append(student_id)
+      writelines(filename, student_list_of_class)
+      return 1
+    else:
+      return
 
 def readlines(filename):
   f = open('%s' % filename, "r")
