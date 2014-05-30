@@ -41,9 +41,9 @@ class TestEnrol(unittest.TestCase):
 
         self.e = enrol.Enrol(self.data)
 
-    def tearDown(self):
-        if os.path.exists(self.data):
-            shutil.rmtree(self.data)
+    # def tearDown(self):
+    #     if os.path.exists(self.data):
+    #         shutil.rmtree(self.data)
 
     def testSubjects(self):
         result = self.e.subjects()

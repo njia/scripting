@@ -8,7 +8,6 @@ import time
 
 class Enrol:
   def __init__(self, dirname):
-    self.class_list = []
     self.subs = {}
     self.directory = dirname
     self.sub_filename = os.path.join(dirname, "SUBJECTS")
@@ -37,6 +36,15 @@ class Enrol:
         class_room = line.split(":")[0]
         class_venue = line.split(":")[1]
         self.classroom_venuse[class_room] = class_venue
+
+  def number_of_student_of_sub(self, subject_id):
+    class_list = self.classes(subject_id)
+    total = 0
+    for c in class_list:
+      fname = os.path.join(self.directory, (c + ".roll"))
+      total += file_len(fname)
+
+    return total
 
   def printClassFileName(self):
     for filename in self.class_stundet_files:
@@ -89,12 +97,13 @@ class Enrol:
       return
 
   def classes(self, sub_code):
+    class_list = []
     for line in self.allclasses:
       if (sub_code in line):
-        self.class_list.append(line.split(":")[0])
+        class_list.append(line.split(":")[0])
 
-    if len(self.class_list) > 0:
-      return self.class_list
+    if len(class_list) > 0:
+      return class_list
     else:
       raise KeyError()
 
@@ -188,3 +197,9 @@ def writelines(filename, lines):
     shutil.move(tmpfile, filename)
     value = 1
     return value
+
+def file_len(fname):
+  with open(fname) as f:
+    for i, l in enumerate(f):
+      pass
+  return i + 1
