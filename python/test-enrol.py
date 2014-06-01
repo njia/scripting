@@ -8,7 +8,7 @@ import enrol
 
 class TestEnrol(unittest.TestCase):
     def setUp(self):
-        self.data = 'test-data'
+        self.data = 'data'
 
         self.fullpath = os.path.join(os.getcwd(), self.data)
 

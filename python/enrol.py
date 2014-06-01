@@ -1,6 +1,5 @@
 #!/usr/bin/python
 import glob
-import keyerror
 import os
 import re
 import shutil
@@ -20,56 +19,67 @@ class Enrol:
     self.class_to_room = {}
     self.classroom_venuse = {}
 
+    # generate a dict of subject code and name
     for line in self.allsubs:
       if ":" in line:
         code, name = line.split(":")
         self.subs[code] = name
 
+    # generate a dict of class to class room mapping
     for line in self.allclasses:
       if ":" in line:
         class_name = line.split(":")[0]
         class_room = line.split(":")[3]
         self.class_to_room[class_name] = class_room
 
+    # genereate a dict of class room to number of seats mapping
     for line in self.all_class_venues:
       if ":" in line:
         class_room = line.split(":")[0]
         class_venue = line.split(":")[1]
         self.classroom_venuse[class_room] = class_venue
 
+  # get subject name by class ID used by stat client
   def get_subject_name_by_classid(self, class_id):
     for line in self.allclasses:
       if class_id in line:
         sub_id = line.split(":")[1]
         return self.subjectName(sub_id)
 
+  # get number of student of a subject, used by stat client
   def number_of_student_of_sub(self, subject_id):
     class_list = self.classes(subject_id)
     total = 0
     for c in class_list:
       fname = os.path.join(self.directory, (c + ".roll"))
-      total += file_len(fname)
+      total += len(readlines(fname))
 
     return total
 
+  # debug fuction
   def printClassFileName(self):
     for filename in self.class_stundet_files:
       print filename
 
+  # debug fuction
   def printVenues(self):
     for key in self.classroom_venuse.keys():
       print key + " => " + self.classroom_venuse[key]
 
+  # debug fuction
   def printClassRoom(self):
     for key in self.class_to_room.keys():
       print key + " => " + self.class_to_room[key]
 
+  # checkStudent function see assignment spec for details
   def checkStudent(self, student_id, subject_id = ""):
     class_list = []
     if not subject_id:
       for filename in self.class_stundet_files:
         if student_id in open('%s' %filename).read():
+          # print "filename before os.path.basename " + filename
           filename = os.path.basename(filename)
+          # print "filename after os.path.basename " + filename
           class_list.append(filename[:-5])
     else:
       for a_class in self.classes(subject_id):
@@ -85,23 +95,27 @@ class Enrol:
     else:
       return None
 
+  # return the student list of a class
   def students_of_class(self, class_name):
     filename = os.path.join(self.directory, (class_name + ".roll"))
     student_list = []
     student_list = readlines(filename)
     return student_list
 
+  # return a list of all subjects
   def subjects(self):
     mylist = list(self.subs.keys())
     mylist.sort()
     return mylist
 
+  # get subject name by subject code
   def subjectName(self, code):
     if (str(code) in self.subs):
       return self.subs[code]
     else:
       return
 
+  # return a list of all classes of a specified subject
   def classes(self, sub_code):
     class_list = []
     for line in self.allclasses:
@@ -113,6 +127,8 @@ class Enrol:
     else:
       raise KeyError()
 
+  # return class related information, like class code, class room,
+  # date and time and who is teaching the class
   def classInfo(self, class_id):
     sub_name = ""
     for line in self.allclasses:
@@ -128,6 +144,7 @@ class Enrol:
     else:
       raise KeyError(class_id)
 
+  # return subject code of a class id, raise KeyError if class ID is not found
   def subject_of_class(self, class_id):
     if class_id not in self.class_to_room:
       raise KeyError
@@ -136,6 +153,7 @@ class Enrol:
       if class_id in a_class:
         return a_class.split(":")[1]
 
+  # enrol fuction, see assignment for spec
   def enrol(self, student_id, class_id):
     if class_id not in self.class_to_room.keys():
       raise KeyError
@@ -166,6 +184,7 @@ class Enrol:
     else:
       return
 
+# utility function, part 1
 def readlines(filename):
   f = open('%s' % filename, "r")
   myLines = []
@@ -178,6 +197,7 @@ def readlines(filename):
   f.close
   return myLines
 
+# utility function, part 1
 def readtable(filename):
   f = open('%s' % filename, "r")
   myLines = []
@@ -187,6 +207,7 @@ def readtable(filename):
   f.close
   return myLines
 
+# utility function, part 1
 def writelines(filename, lines):
   tmpfile = str(time.time())
   try:
@@ -204,6 +225,7 @@ def writelines(filename, lines):
     value = 1
     return value
 
+# simple function to get total number of lines of a file
 def file_len(fname):
   with open(fname) as f:
     for i, l in enumerate(f):
