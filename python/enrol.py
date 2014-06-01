@@ -80,10 +80,10 @@ class Enrol:
 
     if len(class_list) == 1:
       return class_list[0]
-    elif len(class_list) == 0:
-      return None
-    else:
+    elif (subject_id == ""):
       return class_list
+    else:
+      return None
 
   def students_of_class(self, class_name):
     filename = os.path.join(self.directory, (class_name + ".roll"))
