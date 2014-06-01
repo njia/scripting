@@ -21,5 +21,5 @@ elif (str(sys.argv[1]) == '--student' and len(sys.argv) == 3):
   class_list = e.checkStudent(sys.argv[2])
   for c in class_list:
     info = e.classInfo(c)
-    print c +', ' + str(e.subjectName(info[0])) + ', ' + info[1] + ', ' + 'in ' + info[2]
+    print c +', ' + e.get_subject_name_by_classid(c) + ', ' + info[1] + ', ' + 'in ' + info[2]
 

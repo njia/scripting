@@ -37,6 +37,12 @@ class Enrol:
         class_venue = line.split(":")[1]
         self.classroom_venuse[class_room] = class_venue
 
+  def get_subject_name_by_classid(self, class_id):
+    for line in self.allclasses:
+      if class_id in line:
+        sub_id = line.split(":")[1]
+        return self.subjectName(sub_id)
+
   def number_of_student_of_sub(self, subject_id):
     class_list = self.classes(subject_id)
     total = 0
